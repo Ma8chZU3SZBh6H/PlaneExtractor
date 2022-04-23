@@ -1,11 +1,18 @@
-﻿class App
+﻿using Newtonsoft.Json;
+
+internal class App
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = client.GetAsync("http://homeworktask.infare.lt/search.php?from=MAD&to=FUE&depart=2022-05-09&return=2022-05-16").Result;
-        HttpContent content = response.Content;
-        string result = content.ReadAsStringAsync().Result;
-        Console.WriteLine(result);
+        var client = new HttpClient();
+        var response = client
+            .GetAsync("http://homeworktask.infare.lt/search.php?from=MAD&to=FUE&depart=2022-05-09&return=2022-05-16")
+            .Result;
+        var content = response.Content;
+        var result = content.ReadAsStringAsync().Result;
+
+        dynamic test = JsonConvert.DeserializeObject(result);
+
+        Console.WriteLine(test);
     }
 }
