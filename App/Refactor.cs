@@ -1,7 +1,5 @@
 ﻿using System.Dynamic;
-using System.Reflection;
 using App.Types;
-using Newtonsoft.Json;
 using QuickType;
 
 namespace App;
@@ -61,11 +59,12 @@ public class Refactor
         var list = new List<object>();
         var record = records.Last();
         var d = (IDictionary<string, object>)record;
-        foreach(var key in d.Keys)
+        foreach (var key in d.Keys)
         {
             var value = d[key];
             list.Add(value);
         }
+
         return string.Join(", ", list);
     }
 
@@ -80,11 +79,10 @@ public class Refactor
 
     private void addConnections(Journey journey, string title)
     {
-       
         for (var i = 0; i < journey.Flights.Length; i++)
         {
             var flight = journey.Flights[i];
-           
+
             addProperty($"{title} {i + 1} airport departure", flight.AirportDeparture.Code);
             addProperty($"{title} {i + 1} airport arrival", flight.AirportArrival.Code);
             addProperty($"{title} {i + 1} time departure", flight.DateDeparture);
@@ -95,7 +93,6 @@ public class Refactor
 
     private void addInboundConnections()
     {
-        Console.WriteLine(JsonConvert.SerializeObject(outboundJourney));
         addConnections(inboundJourney, "Inbound");
     }
 
@@ -107,7 +104,7 @@ public class Refactor
     private void addPrice()
     {
         addProperty("Price", getPrice(outboundJourney.RecommendationId).ToString());
-        addProperty("Taxes", (outboundJourney.ImportTaxAdl + inboundJourney.ImportTaxAdl).ToString());
+        addProperty("Taxes", Math.Round(outboundJourney.ImportTaxAdl + inboundJourney.ImportTaxAdl, 2).ToString());
     }
 
     private double getPrice(double id)
