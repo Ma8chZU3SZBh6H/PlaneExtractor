@@ -47,8 +47,8 @@ public class Refactor
 
             addPrice();
 
-            addInboundConnections();
             addOutboundConnections();
+            addInboundConnections();
 
             Console.WriteLine($"{parms.from}-{parms.to} adding {getCurrentRecord()}");
         }
@@ -96,12 +96,12 @@ public class Refactor
     private void addInboundConnections()
     {
         Console.WriteLine(JsonConvert.SerializeObject(outboundJourney));
-        addConnections(outboundJourney, "Inbound");
+        addConnections(inboundJourney, "Inbound");
     }
 
     private void addOutboundConnections()
     {
-        addConnections(inboundJourney, "Outbound");
+        addConnections(outboundJourney, "Outbound");
     }
 
     private void addPrice()
