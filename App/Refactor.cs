@@ -14,9 +14,7 @@ public class Refactor
     private double cheapesOutbound;
     private Journey inboundJourney;
     private Journey[] inboundJourneys;
-
     private Journey outboundJourney;
-
     private Journey[] outboundJourneys;
 
     public Refactor(Flights _flights, Params _parms)
@@ -26,12 +24,17 @@ public class Refactor
         records = new List<dynamic>();
         cheapesInbound = 0;
         cheapesOutbound = 0;
-        getOutboundJourneys();
-        getInboundJourneys();
-        getCheapestInboundPrice();
-        getCheapestOutboundPrice();
-        getCheapestInboundJourneys();
-        getCheapestOutboundJourneys();
+        setOutboundJourneys();
+        setInboundJourneys();
+        setCheapestInboundPrice();
+        setCheapestOutboundPrice();
+        setCheapestInboundJourneys();
+        setCheapestOutboundJourneys();
+        if (parms.maxConnections != null)
+        {
+            setInboundJorneysByConnections();
+            setOutboundJorneysByConnections();
+        }
     }
 
     public List<dynamic> execute()
@@ -103,11 +106,11 @@ public class Refactor
 
     private void addPrice()
     {
-        addProperty("Price", getPrice(outboundJourney.RecommendationId).ToString());
+        addProperty("Price", filterPrice(outboundJourney.RecommendationId).ToString());
         addProperty("Taxes", Math.Round(outboundJourney.ImportTaxAdl + inboundJourney.ImportTaxAdl, 2).ToString());
     }
 
-    private double getPrice(double id)
+    private double filterPrice(double id)
     {
         foreach (var availability in flights.Body.Data.TotalAvailabilities)
             if (availability.RecommendationId == id)
@@ -115,16 +118,10 @@ public class Refactor
         return 0;
     }
 
-    private void getOutboundJourneys()
+    private Journey[] filterJourneysByDestination(string destination)
     {
-        outboundJourneys = Array.FindAll(flights.Body.Data.Journeys,
-            journey => journey.Flights[0].AirportDeparture.Code == parms.from);
-    }
-
-    private void getInboundJourneys()
-    {
-        inboundJourneys = Array.FindAll(flights.Body.Data.Journeys,
-            journey => journey.Flights[0].AirportDeparture.Code == parms.to);
+        return Array.FindAll(flights.Body.Data.Journeys,
+            journey => journey.Flights[0].AirportDeparture.Code == destination);
     }
 
     private double filterCheapestPrice(Journey[] journeys)
@@ -133,7 +130,7 @@ public class Refactor
         for (var i = 0; i < journeys.Length; i++)
         {
             var journey = journeys[i];
-            var price = getPrice(journey.RecommendationId);
+            var price = filterPrice(journey.RecommendationId);
             if (price < cheapest)
                 cheapest = price;
         }
@@ -144,25 +141,51 @@ public class Refactor
     private Journey[] filterCheapestJourneys(Journey[] journeys, double cheapest)
     {
         return Array.FindAll(journeys,
-            journey => getPrice(journey.RecommendationId) == cheapest);
+            journey => filterPrice(journey.RecommendationId) == cheapest);
     }
 
-    private void getCheapestInboundPrice()
+    private Journey[] filterJourneysByConnection(Journey[] journeys)
+    {
+        return Array.FindAll(journeys,
+            journey => journey.Flights.Length <= parms.maxConnections);
+    }
+
+    private void setInboundJorneysByConnections()
+    {
+        inboundJourneys = filterJourneysByConnection(inboundJourneys);
+    }
+
+    private void setOutboundJorneysByConnections()
+    {
+        outboundJourneys = filterJourneysByConnection(outboundJourneys);
+    }
+
+    private void setOutboundJourneys()
+    {
+        outboundJourneys = filterJourneysByDestination(parms.from);
+    }
+
+    private void setInboundJourneys()
+    {
+        inboundJourneys = filterJourneysByDestination(parms.to);
+    }
+
+    private void setCheapestInboundPrice()
     {
         cheapesInbound = filterCheapestPrice(inboundJourneys);
     }
 
-    private void getCheapestOutboundPrice()
+    private void setCheapestOutboundPrice()
     {
         cheapesOutbound = filterCheapestPrice(outboundJourneys);
     }
 
-    private void getCheapestInboundJourneys()
+    private void setCheapestInboundJourneys()
     {
         inboundJourneys = filterCheapestJourneys(inboundJourneys, cheapesInbound);
     }
 
-    private void getCheapestOutboundJourneys()
+    private void setCheapestOutboundJourneys()
     {
         outboundJourneys = filterCheapestJourneys(outboundJourneys, cheapesOutbound);
     }

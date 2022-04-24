@@ -6,4 +6,5 @@ public class Params
     public string to { get; set; }
     public string depart { get; set; }
     public string arrive { get; set; }
+    public int? maxConnections { get; set; }
 }
