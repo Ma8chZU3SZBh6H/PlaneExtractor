@@ -47,8 +47,8 @@ public class Refactor
 
             addPrice();
 
-            addOutboundConnections();
             addInboundConnections();
+            addOutboundConnections();
 
             Console.WriteLine($"{parms.from}-{parms.to} adding {getCurrentRecord()}");
         }
@@ -80,9 +80,11 @@ public class Refactor
 
     private void addConnections(Journey journey, string title)
     {
+       
         for (var i = 0; i < journey.Flights.Length; i++)
         {
             var flight = journey.Flights[i];
+           
             addProperty($"{title} {i + 1} airport departure", flight.AirportDeparture.Code);
             addProperty($"{title} {i + 1} airport arrival", flight.AirportArrival.Code);
             addProperty($"{title} {i + 1} time departure", flight.DateDeparture);
@@ -93,6 +95,7 @@ public class Refactor
 
     private void addInboundConnections()
     {
+        Console.WriteLine(JsonConvert.SerializeObject(outboundJourney));
         addConnections(outboundJourney, "Inbound");
     }
 
@@ -104,7 +107,7 @@ public class Refactor
     private void addPrice()
     {
         addProperty("Price", getPrice(outboundJourney.RecommendationId).ToString());
-        addProperty("Taxes", outboundJourney.ImportTaxAdl.ToString());
+        addProperty("Taxes", (outboundJourney.ImportTaxAdl + inboundJourney.ImportTaxAdl).ToString());
     }
 
     private double getPrice(double id)
