@@ -41,7 +41,7 @@ public class Refactor
     {
         addConnections(journey, record, "Inbound");
     }
-    
+
     private static void addOutboundConnections(Journey journey, ExpandoObject record)
     {
         addConnections(journey, record, "Outbound");
@@ -52,22 +52,41 @@ public class Refactor
         return Array.FindAll(_flights.Body.Data.Journeys,
             journey => journey.Flights[0].AirportDeparture.Code == parms.from);
     }
+
     private static Journey[] getInboundJourneys(Flights _flights, Params parms)
     {
         return Array.FindAll(_flights.Body.Data.Journeys,
             journey => journey.Flights[0].AirportDeparture.Code == parms.to);
     }
 
+    private static Journey[] getCheapestJourneys(Flights _flights)
+    {
+        var cheapest = double.MaxValue;
+        for (var i = 0; i < _flights.Body.Data.Journeys.Length; i++)
+        {
+            var journey = _flights.Body.Data.Journeys[i];
+            var price = getPrice(_flights, journey.RecommendationId);
+            if (price < cheapest)
+                cheapest = price;
+        }
+
+        return Array.FindAll(_flights.Body.Data.Journeys,
+            journey => getPrice(_flights, journey.RecommendationId) == cheapest);
+    }
+
     public static List<dynamic> flights(Flights _flights, Params parms)
     {
         var reformatedFlights = new List<dynamic>();
+        _flights.Body.Data.Journeys = getCheapestJourneys(_flights);
         var outboundJourneys = getOutboundJourneys(_flights, parms);
         var inboundJourneys = getInboundJourneys(_flights, parms);
         for (var i = 0; i < outboundJourneys.Length; i += 1)
         {
+            dynamic record = new ExpandoObject();
+
             var outboundJourney = outboundJourneys[i];
             var inboundJourney = inboundJourneys[i];
-            dynamic record = new ExpandoObject();
+
             record.Price = getPrice(_flights, outboundJourney.RecommendationId).ToString();
             record.Taxes = outboundJourney.ImportTaxAdl.ToString();
 
