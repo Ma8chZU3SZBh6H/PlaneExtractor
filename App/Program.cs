@@ -1,18 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using System.Globalization;
+using App;
+using App.Types;
+using CsvHelper;
 
-internal class App
+internal class Program
 {
     private static void Main(string[] args)
     {
-        var client = new HttpClient();
-        var response = client
-            .GetAsync("http://homeworktask.infare.lt/search.php?from=MAD&to=FUE&depart=2022-05-09&return=2022-05-16")
-            .Result;
-        var content = response.Content;
-        var result = content.ReadAsStringAsync().Result;
+        var parms = new Params { from = "MAD", to = "FUE", depart = "2022-05-09", arrive = "2030-05-16" };
+        var flights = Api.flights(parms);
+        var reformatedFlights = Refactor.flights(flights, parms);
 
-        dynamic test = JsonConvert.DeserializeObject(result);
+        Console.WriteLine(reformatedFlights.Count);
 
-        Console.WriteLine(test);
+        using var writer = new StreamWriter("test.csv");
+        using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        csv.WriteRecords(reformatedFlights);
+        csv.Flush();
     }
 }
