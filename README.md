@@ -17,3 +17,6 @@ Run these commands:
 3. `docker compose up`
 
 Output will be placed in `\PlaneExtractor\build\cvs`
+
+### Note for the instructors
+The specific file that was requested in the homework is at `\PlaneExtractor\build\cvs\MAD_AUH.csv`
