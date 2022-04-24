@@ -1,5 +1,7 @@
 ﻿using System.Dynamic;
+using System.Reflection;
 using App.Types;
+using Newtonsoft.Json;
 using QuickType;
 
 namespace App;
@@ -47,9 +49,24 @@ public class Refactor
 
             addOutboundConnections();
             addInboundConnections();
+
+            Console.WriteLine($"{parms.from}-{parms.to} adding {getCurrentRecord()}");
         }
 
         return records;
+    }
+
+    public string getCurrentRecord()
+    {
+        var list = new List<object>();
+        var record = records.Last();
+        var d = (IDictionary<string, object>)record;
+        foreach(var key in d.Keys)
+        {
+            var value = d[key];
+            list.Add(value);
+        }
+        return string.Join(", ", list);
     }
 
     public void addProperty(string propertyName, object propertyValue)
