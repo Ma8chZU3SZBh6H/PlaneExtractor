@@ -1,4 +1,4 @@
-﻿## EPIC PLANE SCRAPPER
+﻿## SIMPLE PLANE SCRAPPER
 
 ### Description
 
